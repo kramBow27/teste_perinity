@@ -1,6 +1,6 @@
-package com.example.repository;
+package org.techenriqueluna.repository;
 
-import com.example.model.Pessoa;
+import org.techenriqueluna.model.Pessoa;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 

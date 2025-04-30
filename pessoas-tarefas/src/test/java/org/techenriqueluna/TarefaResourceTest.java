@@ -1,4 +1,4 @@
-package com.example;
+package org.techenriqueluna;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.rest-assured.RestAssured;

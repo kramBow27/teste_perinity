@@ -1,4 +1,4 @@
-package com.example.dto;
+package org.techenriqueluna.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

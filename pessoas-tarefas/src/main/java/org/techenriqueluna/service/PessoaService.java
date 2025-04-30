@@ -1,8 +1,8 @@
-package com.example.service;
+package org.techenriqueluna.service;
 
-import com.example.dto.*;
-import com.example.model.Pessoa;
-import com.example.repository.PessoaRepository;
+import org.techenriqueluna.dto.*;
+import org.techenriqueluna.model.Pessoa;
+import org.techenriqueluna.repository.PessoaRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;

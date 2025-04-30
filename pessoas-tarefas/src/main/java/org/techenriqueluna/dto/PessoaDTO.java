@@ -1,10 +1,10 @@
-package com.example.dto;
+package org.techenriqueluna.dto;
 
 import lombok.Data;
 
 @Data
 public class PessoaDTO {
-    public Long id;            // opcional para PUT
+    public Long id;    
     public String nome;
     public String departamento;
 }

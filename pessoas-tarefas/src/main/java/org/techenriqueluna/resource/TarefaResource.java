@@ -1,8 +1,8 @@
-package com.example.resource;
+package org.techenriqueluna.resource;
 
-import com.example.dto.TarefaDTO;
-import com.example.model.Tarefa;
-import com.example.service.TarefaService;
+import org.techenriqueluna.dto.TarefaDTO;
+import org.techenriqueluna.model.Tarefa;
+import org.techenriqueluna.service.TarefaService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -22,7 +22,7 @@ public class TarefaResource {
         return Response.status(Response.Status.CREATED).entity(t).build();
     }
 
-    // PUT /tarefas/alocar/{id}?pessoa=123
+
     @PUT
     @Path("/alocar/{id}")
     public Tarefa alocar(@PathParam("id") Long id,
@@ -30,14 +30,12 @@ public class TarefaResource {
         return service.alocar(id, idPessoa);
     }
 
-    // PUT /tarefas/finalizar/{id}
     @PUT
     @Path("/finalizar/{id}")
     public Tarefa finalizar(@PathParam("id") Long id) {
         return service.finalizar(id);
     }
 
-    // GET /tarefas/pendentes
     @GET
     @Path("/pendentes")
     public List<Tarefa> pendentes() {

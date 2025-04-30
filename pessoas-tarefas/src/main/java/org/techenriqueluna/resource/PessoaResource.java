@@ -1,8 +1,8 @@
-package com.example.resource;
+package org.techenriqueluna.resource;
 
-import com.example.dto.*;
-import com.example.model.Pessoa;
-import com.example.service.PessoaService;
+import org.techenriqueluna.dto.*;
+import org.techenriqueluna.model.Pessoa;
+import org.techenriqueluna.service.PessoaService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
