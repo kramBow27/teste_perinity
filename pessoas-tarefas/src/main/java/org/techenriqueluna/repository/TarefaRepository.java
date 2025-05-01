@@ -1,8 +1,8 @@
 package org.techenriqueluna.repository;
 
-import org.techenriqueluna.model.Tarefa;
+import org.techenriqueluna.entity.Tarefa;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import jakarta.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 @ApplicationScoped

@@ -1,12 +1,12 @@
 package org.techenriqueluna.resource;
 
 import org.techenriqueluna.dto.TarefaDTO;
-import org.techenriqueluna.model.Tarefa;
+import org.techenriqueluna.entity.Tarefa;
 import org.techenriqueluna.service.TarefaService;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/tarefas")

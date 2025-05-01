@@ -1,69 +1,57 @@
 package org.techenriqueluna.service;
 
-import org.techenriqueluna.dto.*;
-import org.techenriqueluna.model.Pessoa;
+import org.techenriqueluna.dto.TarefaDTO;
+import org.techenriqueluna.entity.Pessoa;
+import org.techenriqueluna.entity.Tarefa;
 import org.techenriqueluna.repository.PessoaRepository;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import java.time.LocalDate;
+import org.techenriqueluna.repository.TarefaRepository;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class PessoaService {
-
+public class TarefaService {
     @Inject
-    PessoaRepository repo;
+    TarefaRepository repo;
+    @Inject
+    PessoaRepository pessoaRepo;
 
     @Transactional
-    public Pessoa add(PessoaDTO dto) {
-        Pessoa p = new Pessoa();
-        p.setNome(dto.getNome());
-        p.setDepartamento(dto.getDepartamento());
-        repo.persist(p);
-        return p;
-    }
-
-    @Transactional
-    public Pessoa update(Long id, PessoaDTO dto) {
-        Pessoa p = repo.findById(id);
-        if (p == null) return null;
-        p.setNome(dto.getNome());
-        p.setDepartamento(dto.getDepartamento());
-        return p;
-    }
-
-    @Transactional
-    public boolean delete(Long id) {
-        return repo.deleteById(id);
-    }
-
-    public List<PessoaHorasDTO> listarComHoras() {
-        return repo.findAll().stream().map(p -> {
-            long total = p.getTarefas() == null ? 0 : p.getTarefas().stream().mapToLong(t -> t.getDuracao() == null ? 0 : t.getDuracao()).sum();
-            return new PessoaHorasDTO(p.getNome(), p.getDepartamento(), total);
-        }).collect(Collectors.toList());
-    }
-
-    public MediaGastosDTO mediaHoras(GastoFiltroDTO filtro) {
-        List<Pessoa> pessoas = repo.find("nome like ?1", "%" + filtro.getNome() + "%").list();
-        if (pessoas.isEmpty()) return new MediaGastosDTO(filtro.getNome(), 0);
-        LocalDate inicio = filtro.getInicio();
-        LocalDate fim = filtro.getFim();
-        long soma = 0;
-        long totalTarefas = 0;
-        for (Pessoa p : pessoas) {
-            if (p.getTarefas() == null) continue;
-            for (var t : p.getTarefas()) {
-                if (!t.isFinalizado()) continue;
-                if (inicio != null && t.getPrazo().isBefore(inicio)) continue;
-                if (fim != null && t.getPrazo().isAfter(fim)) continue;
-                soma += t.getDuracao();
-                totalTarefas++;
-            }
+    public Tarefa add(TarefaDTO dto) {
+        Tarefa t = new Tarefa();
+        t.setTitulo(dto.getTitulo());
+        t.setDescricao(dto.getDescricao());
+        t.setPrazo(dto.getPrazo());
+        t.setDepartamento(dto.getDepartamento());
+        t.setDuracao(dto.getDuracao());
+        if (dto.getPessoaId() != null) {
+            Pessoa p = pessoaRepo.findById(dto.getPessoaId());
+            if (p != null && p.getDepartamento().equals(dto.getDepartamento())) t.setPessoa(p);
         }
-        double media = totalTarefas == 0 ? 0 : ((double) soma) / totalTarefas;
-        return new MediaGastosDTO(filtro.getNome(), media);
+        repo.persist(t);
+        return t;
+    }
+
+    @Transactional
+    public Tarefa alocar(Long idTarefa, Long idPessoa) {
+        Tarefa tarefa = repo.findById(idTarefa);
+        Pessoa pessoa = pessoaRepo.findById(idPessoa);
+        if (tarefa == null || pessoa == null) return null;
+        if (!tarefa.getDepartamento().equals(pessoa.getDepartamento())) return null;
+        tarefa.setPessoa(pessoa);
+        return tarefa;
+    }
+
+    @Transactional
+    public Tarefa finalizar(Long idTarefa) {
+        Tarefa tarefa = repo.findById(idTarefa);
+        if (tarefa == null) return null;
+        tarefa.setFinalizado(true);
+        return tarefa;
+    }
+
+    public List<Tarefa> pendentes() {
+        return repo.pendentesMaisAntigas(3);
     }
 }

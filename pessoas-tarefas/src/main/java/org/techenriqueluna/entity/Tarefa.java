@@ -1,7 +1,7 @@
-package org.techenriqueluna.model;
+package org.techenriqueluna.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;

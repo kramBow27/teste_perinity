@@ -1,11 +1,11 @@
 package org.techenriqueluna.service;
 
 import org.techenriqueluna.dto.*;
-import org.techenriqueluna.model.Pessoa;
+import org.techenriqueluna.entity.Pessoa;
 import org.techenriqueluna.repository.PessoaRepository;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
