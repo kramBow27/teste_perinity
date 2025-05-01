@@ -1,10 +1,14 @@
+// src/test/java/org/techenriqueluna/TarefaResourceTest.java
 package org.techenriqueluna;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+
+import static io.restassured.RestAssured.*;
 
 @QuarkusTest
 public class TarefaResourceTest {
@@ -12,53 +16,78 @@ public class TarefaResourceTest {
     private Long pessoaId;
 
     @BeforeEach
-    public void setupPessoa() {
-        // cria uma pessoa e garante status 201, extrai o id como Long
-        String body = "{\"nome\":\"Bob\",\"departamento\":\"TI\"}";
-        pessoaId = RestAssured.given()
-                .contentType("application/json")
+    public void seedPessoa() {
+        var body = """
+            {"nome":"DepTest","departamento":"DevOps"}
+            """;
+        pessoaId = given()
+                .contentType(ContentType.JSON)
                 .body(body)
                 .when()
                 .post("/pessoas")
                 .then()
                 .statusCode(201)
-                .body("id", Matchers.notNullValue())
-                .extract()
-                .jsonPath()
-                .getLong("id");
+                .extract().jsonPath().getLong("id");
     }
 
     @Test
-    public void testAlocarEFinalizar() {
-        // cria a tarefa e extrai o id como Long
-        String tarefaBody = "{\"titulo\":\"Feat A\",\"descricao\":\"desc\",\"prazo\":\"2025-05-01\",\"departamento\":\"TI\",\"duracao\":4}";
-        Long tarefaId = RestAssured.given()
-                .contentType("application/json")
-                .body(tarefaBody)
+    @Order(1)
+    public void testCreateAndPendentes() {
+        for (int i = 1; i <= 2; i++) {
+            var t = String.format("""
+                {"titulo":"T%d","descricao":"desc","prazo":"2025-06-0%d","departamento":"DevOps","duracao":%d}
+                """, i, i, i * 2);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(t)
+                    .when()
+                    .post("/tarefas")
+                    .then()
+                    .statusCode(201)
+                    .body("id", Matchers.notNullValue());
+        }
+
+        when()
+                .get("/tarefas/pendentes")
+                .then()
+                .statusCode(200)
+                .body("size()", Matchers.greaterThanOrEqualTo(2));
+    }
+
+    @Test
+    @Order(2)
+    public void testAlocarAndFinalizeAndPendentesUpdate() {
+        var tarefa = """
+            {"titulo":"Final Test","descricao":"d","prazo":"2025-07-01","departamento":"DevOps","duracao":5}
+            """;
+        Long tarefaId = given()
+                .contentType(ContentType.JSON)
+                .body(tarefa)
                 .when()
                 .post("/tarefas")
                 .then()
                 .statusCode(201)
-                .body("id", Matchers.notNullValue())
-                .extract()
-                .jsonPath()
-                .getLong("id");
+                .extract().jsonPath().getLong("id");
 
-        // aloca no endpoint e verifica que veio o mesmo pessoaId (como int no JSON)
-        RestAssured.given()
+        given()
                 .when()
-                .put("/tarefas/alocar/{tarefaId}?pessoa={pessoaId}", tarefaId, pessoaId)
+                .put("/tarefas/alocar/{id}?pessoa={p}", tarefaId, pessoaId)
                 .then()
                 .statusCode(200)
                 .body("pessoa.id", Matchers.equalTo(pessoaId.intValue()));
 
-        // finaliza e verifica finalizado == true
-        RestAssured.given()
+        given()
                 .when()
-                .put("/tarefas/finalizar/{tarefaId}", tarefaId)
+                .put("/tarefas/finalizar/{id}", tarefaId)
                 .then()
-                .log().ifValidationFails()
                 .statusCode(200)
                 .body("finalizado", Matchers.equalTo(true));
+
+        // usa concatenação em vez de placeholder
+        when()
+                .get("/tarefas/pendentes")
+                .then()
+                .statusCode(200)
+                .body("find { it.id == " + tarefaId.intValue() + " }", Matchers.nullValue());
     }
 }

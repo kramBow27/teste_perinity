@@ -48,6 +48,16 @@ public class TarefaResource {
     @GET
     @Path("/pendentes")
     public List<Tarefa> pendentes() {
-        return service.pendentes();
+        return service.pendentesMaisAntigas(3);
+    }
+
+    /**
+     * GET /tarefas/todaspendentes
+     * retorna todas as tarefas sem pessoa, ordenadas por prazo
+     */
+    @GET
+    @Path("/todaspendentes")
+    public List<Tarefa> todasPendentes() {
+        return service.todasPendentes();
     }
 }
