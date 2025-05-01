@@ -1,8 +1,13 @@
 package org.techenriqueluna.service;
 
-import org.techenriqueluna.dto.*;
+import org.techenriqueluna.dto.PessoaDTO;
+import org.techenriqueluna.dto.PessoaHorasDTO;
+import org.techenriqueluna.dto.GastoFiltroDTO;
+import org.techenriqueluna.dto.MediaGastosDTO;
 import org.techenriqueluna.entity.Pessoa;
+import org.techenriqueluna.entity.Tarefa;
 import org.techenriqueluna.repository.PessoaRepository;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -39,27 +44,37 @@ public class PessoaService {
         return repo.deleteById(id);
     }
 
+    @Transactional
     public List<PessoaHorasDTO> listarComHoras() {
-        return repo.findAll().stream().map(p -> {
-            long total = p.getTarefas() == null ? 0 : p.getTarefas().stream().mapToLong(t -> t.getDuracao() == null ? 0 : t.getDuracao()).sum();
-            return new PessoaHorasDTO(p.getNome(), p.getDepartamento(), total);
-        }).collect(Collectors.toList());
+        List<Pessoa> pessoas = repo.findAll().list();
+        return pessoas.stream()
+                .map(p -> {
+                    long total = p.getTarefas() == null ? 0
+                            : p.getTarefas().stream()
+                            .mapToLong(t -> t.getDuracao() == null ? 0 : t.getDuracao())
+                            .sum();
+                    return new PessoaHorasDTO(p.getNome(), p.getDepartamento(), total);
+                })
+                .collect(Collectors.toList());
     }
 
+    @Transactional
     public MediaGastosDTO mediaHoras(GastoFiltroDTO filtro) {
         List<Pessoa> pessoas = repo.find("nome like ?1", "%" + filtro.getNome() + "%").list();
-        if (pessoas.isEmpty()) return new MediaGastosDTO(filtro.getNome(), 0);
+        if (pessoas.isEmpty()) {
+            return new MediaGastosDTO(filtro.getNome(), 0);
+        }
         LocalDate inicio = filtro.getInicio();
         LocalDate fim = filtro.getFim();
         long soma = 0;
         long totalTarefas = 0;
         for (Pessoa p : pessoas) {
             if (p.getTarefas() == null) continue;
-            for (var t : p.getTarefas()) {
-                if (!t.isFinalizado()) continue;
+            for (Tarefa t : p.getTarefas()) {
+                if (!t.getFinalizado()) continue;
                 if (inicio != null && t.getPrazo().isBefore(inicio)) continue;
                 if (fim != null && t.getPrazo().isAfter(fim)) continue;
-                soma += t.getDuracao();
+                soma += t.getDuracao() == null ? 0 : t.getDuracao();
                 totalTarefas++;
             }
         }
