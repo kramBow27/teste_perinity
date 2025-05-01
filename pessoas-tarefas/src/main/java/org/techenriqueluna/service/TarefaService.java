@@ -29,7 +29,6 @@ public class TarefaService {
         t.setPrazo(dto.getPrazo());
         t.setDepartamento(dto.getDepartamento());
         t.setDuracao(dto.getDuracao());
-        // opcionalmente já aloca se vier id de pessoa no DTO
         if (dto.getPessoaId() != null) {
             Pessoa p = pessoaRepo.findById(dto.getPessoaId());
             if (p != null && p.getDepartamento().equals(dto.getDepartamento())) {
